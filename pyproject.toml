@@ -1,0 +1,32 @@
+[project]
+name = "ptcam"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "ISHITOYA Kentaro", email = "kentaro.ishitoya@gmail.com" }
+]
+dependencies = [
+    "opencv-python>=4.10.0.84",
+    "pyqt5>=5.15.11",
+    "pyyaml>=6.0.2",
+    "opencv-contrib-python>=4.10.0.84",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ptcam"]
+
+[project.scripts]
+ptcam = "ptcam.app:main"

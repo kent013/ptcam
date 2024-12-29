@@ -1,0 +1,14 @@
+focal_length_mm: 3.04
+hough_params:
+  dp: 1.2
+  max_radius: 99
+  min_dist: 50.0
+  min_radius: 20
+  param1: 10
+  param2: 70
+real_diameter_mm: 49.0
+rtsp_url: rtsp://192.168.1.51:8554/stream
+screenshot_dir: /Users/ishitoya/Desktop/screenshots
+sensor_height_mm: 2.76
+sensor_width_mm: 3.68
+skip_frames: 5
