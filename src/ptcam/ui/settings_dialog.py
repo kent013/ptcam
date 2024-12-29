@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QDialog, QFormLayout, QDoubleSpinBox, QSpinBox, QLineEdit,
-    QPushButton, QVBoxLayout, QHBoxLayout
+    QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox
 )
 from ptcam.config.config import Config
 
@@ -14,82 +14,119 @@ class SettingsDialog(QDialog):
     def init_ui(self):
         self.setWindowTitle("Settings")
         layout = QVBoxLayout(self)
-        form_layout = QFormLayout()
 
-        # RTSP URL
+        # General Settings Group
+        general_group = QGroupBox("General Settings")
+        general_layout = QFormLayout()
         self.rtsp_url_input = QLineEdit(self.config.get("rtsp_url", ""))
         self.rtsp_url_input.setMinimumWidth(400)
-        form_layout.addRow("RTSP URL:", self.rtsp_url_input)
+        general_layout.addRow("RTSP URL:", self.rtsp_url_input)
 
-        # Screenshot Directory
         self.screenshot_dir_input = QLineEdit(self.config.get("screenshot_dir", ""))
         self.screenshot_dir_input.setMinimumWidth(400)
-        form_layout.addRow("Screenshot Directory:", self.screenshot_dir_input)
+        general_layout.addRow("Screenshot Directory:", self.screenshot_dir_input)
 
-        # Skip Frames
         self.skip_frames_input = QSpinBox()
+        self.skip_frames_input.setMaximum(1000)
         self.skip_frames_input.setValue(self.config.get("skip_frames", 0))
-        form_layout.addRow("Skip Frames:", self.skip_frames_input)
+        general_layout.addRow("Skip Frames:", self.skip_frames_input)
+        general_group.setLayout(general_layout)
+        layout.addWidget(general_group)
 
-        # Hough DP
+        # Hough Circle Settings Group
+        hough_group = QGroupBox("Hough Circle Settings")
+        hough_layout = QFormLayout()
         self.hough_dp_input = QDoubleSpinBox()
         self.hough_dp_input.setDecimals(2)
         self.hough_dp_input.setSingleStep(0.1)
+        self.hough_dp_input.setMaximum(1000)
         self.hough_dp_input.setValue(self.config.get("hough_params.dp", 1.2))
-        form_layout.addRow("Hough DP:", self.hough_dp_input)
+        hough_layout.addRow("Hough DP:", self.hough_dp_input)
 
-        # Hough Min Dist
         self.hough_min_dist_input = QDoubleSpinBox()
         self.hough_min_dist_input.setDecimals(1)
         self.hough_min_dist_input.setSingleStep(1)
+        self.hough_min_dist_input.setMaximum(1000)
         self.hough_min_dist_input.setValue(self.config.get("hough_params.min_dist", 50))
-        form_layout.addRow("Hough Min Dist:", self.hough_min_dist_input)
+        hough_layout.addRow("Hough Min Dist:", self.hough_min_dist_input)
 
-        # Hough Param1
         self.hough_param1_input = QSpinBox()
+        self.hough_param1_input.setMaximum(1000)
         self.hough_param1_input.setValue(self.config.get("hough_params.param1", 100))
-        form_layout.addRow("Hough Param1:", self.hough_param1_input)
+        hough_layout.addRow("Hough Param1:", self.hough_param1_input)
 
-        # Hough Param2
         self.hough_param2_input = QSpinBox()
+        self.hough_param2_input.setMaximum(1000)
         self.hough_param2_input.setValue(self.config.get("hough_params.param2", 70))
-        form_layout.addRow("Hough Param2:", self.hough_param2_input)
+        hough_layout.addRow("Hough Param2:", self.hough_param2_input)
 
-        # Hough Min Radius
         self.hough_min_radius_input = QSpinBox()
+        self.hough_min_radius_input.setMaximum(1000)
         self.hough_min_radius_input.setValue(self.config.get("hough_params.min_radius", 20))
-        form_layout.addRow("Hough Min Radius:", self.hough_min_radius_input)
+        hough_layout.addRow("Hough Min Radius:", self.hough_min_radius_input)
 
-        # Hough Max Radius
         self.hough_max_radius_input = QSpinBox()
+        self.hough_max_radius_input.setMaximum(1000)
         self.hough_max_radius_input.setValue(self.config.get("hough_params.max_radius", 100))
-        form_layout.addRow("Hough Max Radius:", self.hough_max_radius_input)
+        hough_layout.addRow("Hough Max Radius:", self.hough_max_radius_input)
+        hough_group.setLayout(hough_layout)
+        layout.addWidget(hough_group)
 
-        # Real Diameter
+        # Distance Settings Group
+        distance_group = QGroupBox("Distance Settings")
+        distance_layout = QFormLayout()
         self.real_diameter_input = QDoubleSpinBox()
-        self.real_diameter_input.setDecimals(3)
+        self.real_diameter_input.setDecimals(2)
+        self.real_diameter_input.setMaximum(1000)
         self.real_diameter_input.setValue(self.config.get("real_diameter_mm", 49))
-        form_layout.addRow("Real Diameter (mm):", self.real_diameter_input)
+        distance_layout.addRow("Real Diameter (mm):", self.real_diameter_input)
 
-        # Focal Length
         self.focal_length_input = QDoubleSpinBox()
-        self.focal_length_input.setDecimals(3)
+        self.focal_length_input.setDecimals(2)
+        self.focal_length_input.setMaximum(1000)
         self.focal_length_input.setValue(self.config.get("focal_length_mm", 3.04))
-        form_layout.addRow("Focal Length (mm):", self.focal_length_input)
+        distance_layout.addRow("Focal Length (mm):", self.focal_length_input)
 
-        # Sensor Width
         self.sensor_width_input = QDoubleSpinBox()
-        self.sensor_width_input.setDecimals(3)
+        self.sensor_width_input.setDecimals(2)
+        self.sensor_width_input.setMaximum(1000)
         self.sensor_width_input.setValue(self.config.get("sensor_width_mm", 3.68))
-        form_layout.addRow("Sensor Width (mm):", self.sensor_width_input)
+        distance_layout.addRow("Sensor Width (mm):", self.sensor_width_input)
 
-        # Sensor Height
         self.sensor_height_input = QDoubleSpinBox()
-        self.sensor_height_input.setDecimals(3)
+        self.sensor_height_input.setDecimals(2)
+        self.sensor_height_input.setMaximum(1000)
         self.sensor_height_input.setValue(self.config.get("sensor_height_mm", 2.76))
-        form_layout.addRow("Sensor Height (mm):", self.sensor_height_input)
+        distance_layout.addRow("Sensor Height (mm):", self.sensor_height_input)
+        distance_group.setLayout(distance_layout)
+        layout.addWidget(distance_group)
 
-        layout.addLayout(form_layout)
+        # Servo Settings Group
+        servo_group = QGroupBox("Servo Settings")
+        servo_layout = QFormLayout()
+        self.pan_pin_input = QSpinBox()
+        self.pan_pin_input.setMaximum(1000)
+        self.pan_pin_input.setValue(self.config.get("servo_config.pan.pin", 15))
+        servo_layout.addRow("Pan Servo Pin:", self.pan_pin_input)
+
+        self.pan_default_angle_input = QDoubleSpinBox()
+        self.pan_default_angle_input.setDecimals(2)
+        self.pan_default_angle_input.setMaximum(1000)
+        self.pan_default_angle_input.setValue(self.config.get("servo_config.pan.default_angle", 0.0))
+        servo_layout.addRow("Pan Default Angle:", self.pan_default_angle_input)
+
+        self.tilt_pin_input = QSpinBox()
+        self.tilt_pin_input.setMaximum(1000)
+        self.tilt_pin_input.setValue(self.config.get("servo_config.tilt.pin", 14))
+        servo_layout.addRow("Tilt Servo Pin:", self.tilt_pin_input)
+
+        self.tilt_default_angle_input = QDoubleSpinBox()
+        self.tilt_default_angle_input.setDecimals(2)
+        self.tilt_default_angle_input.setMaximum(1000)
+        self.tilt_default_angle_input.setValue(self.config.get("servo_config.tilt.default_angle", 0.0))
+        servo_layout.addRow("Tilt Default Angle:", self.tilt_default_angle_input)
+        servo_group.setLayout(servo_layout)
+        layout.addWidget(servo_group)
 
         # Save Button
         save_button = QPushButton("Save")
@@ -115,5 +152,9 @@ class SettingsDialog(QDialog):
         self.config.set("focal_length_mm", self.focal_length_input.value())
         self.config.set("sensor_width_mm", self.sensor_width_input.value())
         self.config.set("sensor_height_mm", self.sensor_height_input.value())
+        self.config.set("servo_config.pan.pin", self.pan_pin_input.value())
+        self.config.set("servo_config.pan.default_angle", self.pan_default_angle_input.value())
+        self.config.set("servo_config.tilt.pin", self.tilt_pin_input.value())
+        self.config.set("servo_config.tilt.default_angle", self.tilt_default_angle_input.value())
         self.config.save()
         self.accept()

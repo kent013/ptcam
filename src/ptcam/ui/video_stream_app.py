@@ -1,16 +1,19 @@
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QSizePolicy
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
-from ptcam.ui.settings_dialog import settings_dialog
-from ptcam.tracker import TrackerRunner
+from ptcam.ui.settings_dialog import SettingsDialog
+from ptcam.tracker.gui_tracker_runner import GUITrackerRunner
 from ptcam.config.config import Config
+import cv2
 
 
 class VideoStreamApp(QMainWindow):
     def __init__(self, config: Config):
         super().__init__()
         self.config = config
-        self.runner = VideoStreamRunner(config, self.update_ui)
+        self.runner = GUITrackerRunner(config)
+        self.runner.frame_processed.connect(self.update_frame)
+        self.runner.error_signal.connect(self.handle_error)
         self.init_ui()
 
     def init_ui(self):
@@ -23,12 +26,13 @@ class VideoStreamApp(QMainWindow):
 
         button_panel = QVBoxLayout()
         button_panel.setContentsMargins(10, 10, 10, 10)
+
         self.settings_button = QPushButton("Settings", self)
         self.settings_button.clicked.connect(self.open_settings_dialog)
         button_panel.addWidget(self.settings_button)
 
         self.clear_tracker_button = QPushButton("Clear Tracker", self)
-        self.clear_tracker_button.clicked.connect(self.runner.reset_tracker)
+        self.clear_tracker_button.clicked.connect(self.clear_tracker)
         button_panel.addWidget(self.clear_tracker_button)
 
         button_panel.addStretch()
@@ -47,30 +51,44 @@ class VideoStreamApp(QMainWindow):
         main_layout.addLayout(video_layout)
         main_layout.setStretch(1, 1)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.runner.run)
-        self.timer.start(30)
+    def start_tracking(self):
+        self.runner.start_tracking()
 
-    def update_ui(self, frame, results):
-        for i, x, y, w, h, distance in results:
+    def stop_tracking(self):
+        self.runner.stop_tracking()
+
+    def update_frame(self, frame, data):
+        if frame is None:
+            return
+
+        height, width, _ = frame.shape
+
+        for i, ((x, y, w, h), distance) in enumerate(data):
+            cv2.rectangle(frame, (int(x), int(y)), (int(x + w), int(y + h)), (0, 0, 255), 2)
             label_text = f"Tracker{i}: {distance:.2f} mm" if distance is not None else f"Tracker{i}: Distance N/A"
-            cv2.rectangle(frame, (int(x), int(y)), (int(x + w), int(y + h)), (0, 255, 0), 2)
             cv2.putText(frame, label_text, (int(x), int(y) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        height, width, channel = frame.shape
-        bytes_per_line = 3 * width
-        qt_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        qt_image = QImage(frame.data, width, height, 3 * width, QImage.Format_RGB888)
         self.video_label.setPixmap(QPixmap.fromImage(qt_image))
+
+    def handle_error(self, message):
+        print(f"Error: {message}")
 
     def open_settings_dialog(self):
         dialog = SettingsDialog(self.config, self)
         if dialog.exec_():
             self.config.save()
-            self.runner.cap.release()
-            self.runner = VideoStreamRunner(self.config, self.update_ui)
+            self.runner.stop_tracking()
+            self.runner = GUITrackerRunner(self.config)
+            self.runner.frame_processed.connect(self.update_frame)
+            self.runner.error_signal.connect(self.handle_error)
+            self.runner.start_tracking()
+
+    def clear_tracker(self):
+        self.runner.reset_trackers()
 
     def closeEvent(self, event):
-        self.runner.cap.release()
+        self.runner.stop_tracking()
         super().closeEvent(event)
